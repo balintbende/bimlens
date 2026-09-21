@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-bimlens}
+      POSTGRES_USER: ${POSTGRES_USER:-bimlens}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bimlens}
+    ports:
+      - "5432:5432"
+    volumes:
+      # Postgres 18 images keep data under /var/lib/postgresql/<major>/, so mount the parent.
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Azure Blob Storage emulator. Account and key are Azurite's public, well-known dev credentials.
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.37.0
+    command: azurite-blob --blobHost 0.0.0.0 --location /data --loose --skipApiVersionCheck
+    ports:
+      - "10000:10000" # Blob API
+    volumes:
+      - azurite-data:/data
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "10000"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot job that creates the blob container, then exits.
+  azurite-init:
+    image: mcr.microsoft.com/azure-storage/azurite:3.37.0
+    depends_on:
+      azurite:
+        condition: service_healthy
+    environment:
+      AZURITE_ACCOUNT: devstoreaccount1
+      AZURITE_KEY: Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==
+      AZURITE_BLOB_ENDPOINT: http://azurite:10000/devstoreaccount1
+      AZURITE_CONTAINER: ${BLOB_CONTAINER:-models}
+    volumes:
+      - ./docker/azurite/create-container.mjs:/init/create-container.mjs:ro
+    command: node /init/create-container.mjs
+
+volumes:
+  postgres-data:
+  azurite-data:

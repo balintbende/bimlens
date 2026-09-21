@@ -31,3 +31,10 @@ Each app has its own workflow in [`.github/workflows`](.github/workflows), trigg
 See [`api/README.md`](api/README.md) and [`web/README.md`](web/README.md). The web dev server proxies `/api` to the API on `localhost:5292`.
 
 To run the whole stack in containers, run `docker compose up --build` and open `http://localhost:8080`. nginx in the web image serves the SPA and proxies `/api` to the api container. The API is also exposed directly on `localhost:5292`.
+
+The backing services live in [`docker-compose-data-store.yml`](docker-compose-data-store.yml), which `docker-compose.yml` includes. To run only them, e.g. while running the API with `dotnet run`, use `docker compose -f docker-compose-data-store.yml up -d`. Dev credentials default to `bimlens` and can be overridden via `.env`:
+
+| Service | Port | Notes |
+|---|---|---|
+| PostgreSQL 18 | `5432` | database `bimlens`, user/password `bimlens` / `bimlens` |
+| Azurite (Azure Blob emulator) | `10000` | well-known dev account `devstoreaccount1` ([key](https://learn.microsoft.com/azure/storage/common/storage-use-azurite#http-connection-strings)), container `models` created on startup |

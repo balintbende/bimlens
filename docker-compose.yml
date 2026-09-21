@@ -1,13 +1,22 @@
-# Local test of the full stack: web (nginx) serves the SPA and proxies /api to the api container.
-#   docker compose up --build   ->  http://localhost:8080
+include:
+  - docker-compose-data-store.yml
+
 services:
   api:
     build:
       context: ./api
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=${POSTGRES_DB:-bimlens};Username=${POSTGRES_USER:-bimlens};Password=${POSTGRES_PASSWORD:-bimlens}
+      ConnectionStrings__BlobStorage: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
+      Storage__Container: ${BLOB_CONTAINER:-models}
     ports:
       - "5292:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      azurite-init:
+        condition: service_completed_successfully
 
   web:
     build:
