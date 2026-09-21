@@ -1,14 +1,6 @@
 # bimlens
 
-Upload IFC building models and browse what's been stored.
-
-bimlens is the application used across my infrastructure portfolio projects. It is built once here and published to GHCR; the infrastructure repos only deploy it:
-
-| Repo | What it shows |
-|---|---|
-| [gitops-flux-lab](https://github.com/balintbende/gitops-flux-lab) | GitOps delivery with Flux and Helm |
-| [aws-terraform-lab](https://github.com/balintbende/aws-terraform-lab) | AWS infrastructure with Terraform (image pulled via ECR pull-through cache) |
-| [azure-terraform-lab](https://github.com/balintbende/azure-terraform-lab) | Azure infrastructure with Terraform (image pulled via ACR cache rule) |
+Upload and visualize IFC models.
 
 ## Layout
 
