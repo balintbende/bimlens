@@ -1,0 +1,6 @@
+# Repo-wide ignores. App-specific rules live in api/.gitignore and web/.gitignore.
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.local

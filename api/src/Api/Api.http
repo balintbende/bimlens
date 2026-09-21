@@ -1,0 +1,21 @@
+@Api_HostAddress = http://localhost:5292
+
+### Store a model
+POST {{Api_HostAddress}}/store
+Content-Type: application/json
+
+{
+  "name": "Sample IFC",
+  "wallCount": 42,
+  "beamCount": 17,
+  "columnCount": 12,
+  "slabCount": 8,
+  "doorCount": 6,
+  "windowCount": 24
+}
+
+### Fetch all models
+GET {{Api_HostAddress}}/models
+Accept: application/json
+
+###

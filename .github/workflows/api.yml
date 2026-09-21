@@ -1,0 +1,87 @@
+name: Api CI/CD
+
+on:
+  push:
+    paths:
+      - "api/**"
+      - ".github/workflows/api.yml"
+  pull_request:
+    paths:
+      - "api/**"
+      - ".github/workflows/api.yml"
+
+defaults:
+  run:
+    working-directory: api
+
+jobs:
+  test:
+    name: "Running tests"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: "Run dotnet format"
+        working-directory: api/src
+        run: dotnet format --verbosity diagnostic --verify-no-changes
+
+      - name: "Unit tests"
+        working-directory: api/src
+        run: dotnet test --test-adapter-path:. --logger:"junit;LogFilePath=../artifacts/test-output.xml"
+
+      - name: "Publish Unit Test Results"
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: ./api/src/artifacts/*.xml
+
+  publish:
+    needs: test
+    name: "Build And Publish Image"
+    # Only publish on pushes to branches, not on pull requests.
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      REGISTRY: ghcr.io
+      # GHCR is the single source of truth; cloud labs pull it through ECR/ACR cache rules.
+      # ghcr.io image path, e.g. ghcr.io/balintbende/bimlens/api
+      IMAGE_NAME: ${{ github.repository }}/api
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Inject slug/short variables"
+        uses: rlespinasse/github-slug-action@v4
+
+      - name: "Log in to GHCR"
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Tags match the Flux ImagePolicy pattern '^<branch>-[a-f0-9]+-(?P<ts>[0-9]+)':
+      #   <branch>-<short-sha>-<unix-ts>  -> sortable tag Flux promotes by timestamp
+      #   <branch>                        -> moving "latest for this branch" tag
+      - name: "Build, tag, and push image to GHCR"
+        env:
+          IMAGE_TAG: ${{ env.GITHUB_REF_SLUG }}-${{ env.GITHUB_SHA_SHORT }}
+          IMAGE_TAG_LATEST: ${{ env.GITHUB_REF_SLUG }}
+        run: |
+          ts=$(date +%s)
+          docker build \
+            -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG-${ts} \
+            -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG_LATEST .
+          docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG-${ts}
+          docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG_LATEST
