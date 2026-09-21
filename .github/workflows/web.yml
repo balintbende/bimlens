@@ -33,4 +33,44 @@ jobs:
       - run: npm run lint
       - run: npm run build
 
-  # Image publishing (ghcr.io/<owner>/bimlens/web) is added together with the web Dockerfile.
+  publish:
+    needs: build
+    name: "Build And Publish Image"
+    # Only publish on pushes to branches, not on pull requests.
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      REGISTRY: ghcr.io
+      # GHCR is the single source of truth; cloud labs pull it through ECR/ACR cache rules.
+      # ghcr.io image path, e.g. ghcr.io/balintbende/bimlens/web
+      IMAGE_NAME: ${{ github.repository }}/web
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Inject slug/short variables"
+        uses: rlespinasse/github-slug-action@v4
+
+      - name: "Log in to GHCR"
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Tags match the Flux ImagePolicy pattern '^<branch>-[a-f0-9]+-(?P<ts>[0-9]+)':
+      #   <branch>-<short-sha>-<unix-ts>  -> sortable tag Flux promotes by timestamp
+      #   <branch>                        -> moving "latest for this branch" tag
+      - name: "Build, tag, and push image to GHCR"
+        env:
+          IMAGE_TAG: ${{ env.GITHUB_REF_SLUG }}-${{ env.GITHUB_SHA_SHORT }}
+          IMAGE_TAG_LATEST: ${{ env.GITHUB_REF_SLUG }}
+        run: |
+          ts=$(date +%s)
+          docker build \
+            -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG-${ts} \
+            -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG_LATEST .
+          docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG-${ts}
+          docker push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG_LATEST

@@ -1,0 +1,18 @@
+server {
+    listen 8080;
+    root /usr/share/nginx/html;
+
+    # Mirrors the Vite dev proxy: /api/store -> ${API_UPSTREAM}/store
+    location /api/ {
+        proxy_pass ${API_UPSTREAM}/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 100m;
+    }
+
+    # SPA fallback so client-side routes resolve to index.html.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

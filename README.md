@@ -24,8 +24,10 @@ Each app has its own workflow in [`.github/workflows`](.github/workflows), trigg
 | Image | Tags |
 |---|---|
 | `ghcr.io/balintbende/bimlens/api` | `<branch>-<short-sha>-<unix-ts>` (immutable), `<branch>` (moving) |
-| `ghcr.io/balintbende/bimlens/web` | coming with the web Dockerfile |
+| `ghcr.io/balintbende/bimlens/web` | `<branch>-<short-sha>-<unix-ts>` (immutable), `<branch>` (moving) |
 
 ## Development
 
 See [`api/README.md`](api/README.md) and [`web/README.md`](web/README.md). The web dev server proxies `/api` to the API on `localhost:5292`.
+
+To run the whole stack in containers, run `docker compose up --build` and open `http://localhost:8080`. nginx in the web image serves the SPA and proxies `/api` to the api container. The API is also exposed directly on `localhost:5292`.
