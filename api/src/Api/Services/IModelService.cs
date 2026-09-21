@@ -7,7 +7,7 @@ public interface IModelService
     Task<IReadOnlyList<ModelDto>> FetchModelsAsync(CancellationToken cancellationToken = default);
 
     Task<ModelDto> StoreAsync(
-        StoreModelRequest request,
+        string name,
         Stream file,
         long fileSize,
         string contentType,

@@ -1,37 +1,9 @@
 @Api_HostAddress = http://localhost:5292
 
-### Store a model (metadata + IFC file)
+### Store an IFC file
 POST {{Api_HostAddress}}/store
 Content-Type: multipart/form-data; boundary=boundary
 
---boundary
-Content-Disposition: form-data; name="name"
-
-Sample IFC
---boundary
-Content-Disposition: form-data; name="wallCount"
-
-42
---boundary
-Content-Disposition: form-data; name="beamCount"
-
-17
---boundary
-Content-Disposition: form-data; name="columnCount"
-
-12
---boundary
-Content-Disposition: form-data; name="slabCount"
-
-8
---boundary
-Content-Disposition: form-data; name="doorCount"
-
-6
---boundary
-Content-Disposition: form-data; name="windowCount"
-
-24
 --boundary
 Content-Disposition: form-data; name="file"; filename="sample.ifc"
 Content-Type: application/octet-stream

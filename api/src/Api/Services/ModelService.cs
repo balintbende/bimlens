@@ -14,7 +14,7 @@ public class ModelService(IModelRepository repository, IFileStorage storage) : I
     }
 
     public async Task<ModelDto> StoreAsync(
-        StoreModelRequest request,
+        string name,
         Stream file,
         long fileSize,
         string contentType,
@@ -29,13 +29,7 @@ public class ModelService(IModelRepository repository, IFileStorage storage) : I
         var model = new Model
         {
             Id = id,
-            Name = request.Name,
-            WallCount = request.WallCount,
-            BeamCount = request.BeamCount,
-            ColumnCount = request.ColumnCount,
-            SlabCount = request.SlabCount,
-            DoorCount = request.DoorCount,
-            WindowCount = request.WindowCount,
+            Name = name,
             BlobName = blobName,
             FileSize = fileSize,
             CreatedAt = DateTime.UtcNow,
@@ -56,12 +50,7 @@ public class ModelService(IModelRepository repository, IFileStorage storage) : I
     private static ModelDto ToDto(Model model) => new(
         model.Id,
         model.Name,
-        model.WallCount,
-        model.BeamCount,
-        model.ColumnCount,
-        model.SlabCount,
-        model.DoorCount,
-        model.WindowCount,
         model.FileSize,
-        model.CreatedAt);
+        model.CreatedAt,
+        model.BlobName);
 }

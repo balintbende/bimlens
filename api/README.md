@@ -2,7 +2,7 @@
 
 Backend for **bimlens**.
 
-Receives IFC files plus parsed model data from `web`. Metadata goes to PostgreSQL (EF Core), the file itself to Azure Blob Storage (Azurite locally). Exposes a REST API with controller / service / repository layering (SOLID).
+Receives IFC files from `web`. Metadata (name, size, blob name) goes to PostgreSQL (EF Core), the file itself to Azure Blob Storage (Azurite locally). Exposes a REST API with controller / service / repository layering (SOLID).
 
 ## Stack
 

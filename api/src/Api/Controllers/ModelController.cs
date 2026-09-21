@@ -14,10 +14,7 @@ public class ModelController(IModelService service) : ControllerBase
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(MaxUploadBytes)]
     [RequestFormLimits(MultipartBodyLengthLimit = MaxUploadBytes)]
-    public async Task<ActionResult<ModelDto>> Store(
-        [FromForm] StoreModelRequest request,
-        IFormFile file,
-        CancellationToken cancellationToken)
+    public async Task<ActionResult<ModelDto>> Store(IFormFile file, CancellationToken cancellationToken)
     {
         if (file.Length == 0)
         {
@@ -25,8 +22,9 @@ public class ModelController(IModelService service) : ControllerBase
         }
 
         await using var stream = file.OpenReadStream();
+        var name = Path.GetFileName(file.FileName);
         var contentType = string.IsNullOrEmpty(file.ContentType) ? "application/octet-stream" : file.ContentType;
-        var dto = await service.StoreAsync(request, stream, file.Length, contentType, cancellationToken);
+        var dto = await service.StoreAsync(name, stream, file.Length, contentType, cancellationToken);
         return CreatedAtAction(nameof(FetchAll), dto);
     }
 

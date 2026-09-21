@@ -14,24 +14,22 @@ public class ModelServiceTests
     private ModelService CreateService(IModelRepository? repository = null) =>
         new(repository ?? new InMemoryModelRepository(), _storage);
 
-    private static Task<ModelDto> Store(ModelService service, StoreModelRequest request, string content = "ISO-10303-21;")
+    private static Task<ModelDto> Store(ModelService service, string name, string content = "ISO-10303-21;")
     {
         var bytes = Encoding.UTF8.GetBytes(content);
-        return service.StoreAsync(request, new MemoryStream(bytes), bytes.Length, "application/octet-stream");
+        return service.StoreAsync(name, new MemoryStream(bytes), bytes.Length, "application/octet-stream");
     }
 
     [Fact]
     public async Task Store_ReturnsDto_WithGeneratedIdAndCreatedAt()
     {
         var service = CreateService();
-        var request = new StoreModelRequest("Sample IFC", 42, 17, 12, 8, 6, 24);
 
-        var dto = await Store(service, request);
+        var dto = await Store(service, "sample.ifc");
 
         Assert.NotEqual(Guid.Empty, dto.Id);
-        Assert.Equal("Sample IFC", dto.Name);
-        Assert.Equal(42, dto.WallCount);
-        Assert.Equal(24, dto.WindowCount);
+        Assert.Equal("sample.ifc", dto.Name);
+        Assert.Equal($"{dto.Id}.ifc", dto.BlobName);
         Assert.Equal(13, dto.FileSize);
         Assert.NotEqual(default, dto.CreatedAt);
     }
@@ -41,7 +39,7 @@ public class ModelServiceTests
     {
         var service = CreateService();
 
-        var dto = await Store(service, new StoreModelRequest("A", 1, 1, 1, 1, 1, 1), "file-content");
+        var dto = await Store(service, "A", "file-content");
 
         Assert.Equal("file-content", Encoding.UTF8.GetString(_storage.Files[$"{dto.Id}.ifc"]));
     }
@@ -52,7 +50,7 @@ public class ModelServiceTests
         var service = CreateService(new FailingModelRepository());
 
         await Assert.ThrowsAsync<InvalidOperationException>(
-            () => Store(service, new StoreModelRequest("A", 1, 1, 1, 1, 1, 1)));
+            () => Store(service, "A"));
 
         Assert.Empty(_storage.Files);
     }
@@ -69,8 +67,8 @@ public class ModelServiceTests
     public async Task FetchModels_ReturnsAllStoredModels()
     {
         var service = CreateService();
-        await Store(service, new StoreModelRequest("A", 1, 1, 1, 1, 1, 1));
-        await Store(service, new StoreModelRequest("B", 2, 2, 2, 2, 2, 2));
+        await Store(service, "A");
+        await Store(service, "B");
 
         var models = await service.FetchModelsAsync();
 
@@ -84,8 +82,8 @@ public class ModelServiceTests
     {
         var service = CreateService();
 
-        var first = await Store(service, new StoreModelRequest("A", 1, 1, 1, 1, 1, 1));
-        var second = await Store(service, new StoreModelRequest("B", 1, 1, 1, 1, 1, 1));
+        var first = await Store(service, "A");
+        var second = await Store(service, "B");
 
         Assert.NotEqual(first.Id, second.Id);
     }
