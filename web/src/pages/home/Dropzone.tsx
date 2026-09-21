@@ -1,19 +1,14 @@
-import { useCallback } from 'react';
+import { useCallback, type ReactNode } from 'react';
 import { useDropzone } from 'react-dropzone';
 
-export type UploadStatus =
-  | { kind: 'idle' }
-  | { kind: 'pending' }
-  | { kind: 'success'; id: string }
-  | { kind: 'error'; message: string };
-
 type Props = {
-  file: File | null;
-  status: UploadStatus;
   onFile: (file: File) => void;
+  disabled: boolean;
+  // Content shown once a file is loaded (the viewer); the whole area stays a drop target.
+  children?: ReactNode;
 };
 
-export default function Dropzone({ file, status, onFile }: Props) {
+export default function Dropzone({ onFile, disabled, children }: Props) {
   const onDropAccepted = useCallback(
     (acceptedFiles: File[]) => {
       onFile(acceptedFiles[0]);
@@ -21,45 +16,51 @@ export default function Dropzone({ file, status, onFile }: Props) {
     [onFile],
   );
 
-  const uploading = status.kind === 'pending';
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const hasContent = !!children;
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDropAccepted,
     accept: { 'application/x-step': ['.ifc'] },
     multiple: false,
-    disabled: uploading,
+    disabled,
+    // With a model shown, clicks belong to the 3D navigation, not the file dialog.
+    noClick: hasContent,
+    noKeyboard: hasContent,
   });
 
-  const className = `w-full flex-1 min-h-64 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-colors ${
-    uploading ? 'cursor-wait' : 'cursor-pointer'
+  const className = `relative w-full flex-1 min-h-64 border-2 rounded-xl overflow-hidden transition-colors ${
+    hasContent
+      ? 'border-white/10'
+      : `border-dashed flex flex-col items-center justify-center gap-2 ${
+          disabled ? 'cursor-wait' : 'cursor-pointer'
+        }`
   } ${
     isDragActive
       ? 'border-white bg-white/5'
-      : 'border-white/20 hover:border-white/50'
+      : hasContent
+        ? ''
+        : 'border-white/20 hover:border-white/50'
   }`;
 
   return (
     <div {...getRootProps({ className })}>
       <input {...getInputProps()} />
-      {file ? (
-        <div className="text-center space-y-1">
-          <div className="text-lg font-semibold text-secondary">
-            {file.name}
-          </div>
-          <div className="text-sm text-light">
-            {(file.size / 1024 / 1024).toFixed(2)} MB
-          </div>
-          {status.kind === 'pending' && (
-            <p className="text-sm text-light">Uploading…</p>
+      {hasContent ? (
+        <>
+          {children}
+          <button
+            type="button"
+            onClick={open}
+            disabled={disabled}
+            className="absolute top-3 right-3 rounded-md bg-white/10 px-3 py-1.5 text-sm text-secondary backdrop-blur hover:bg-white/20 disabled:opacity-40 disabled:cursor-wait"
+          >
+            Upload another file
+          </button>
+          {isDragActive && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-lg font-medium text-secondary">
+              Drop to replace the model
+            </div>
           )}
-          {status.kind === 'success' && (
-            <p className="text-sm text-green-400">
-              Stored ✓ (id: {status.id}) — drop another file to upload more
-            </p>
-          )}
-          {status.kind === 'error' && (
-            <p className="text-sm text-red-400">{status.message}</p>
-          )}
-        </div>
+        </>
       ) : (
         <div className="text-center text-light">
           <div className="text-lg font-medium">
