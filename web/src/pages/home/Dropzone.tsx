@@ -20,10 +20,10 @@ export default function Dropzone({ file, onFile }: Props) {
     multiple: false,
   });
 
-  const className = `w-full h-64 border-2 border-dashed rounded-md flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${
+  const className = `w-full flex-1 min-h-64 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors ${
     isDragActive
-      ? 'border-primary bg-primary/5'
-      : 'border-gray-300 hover:border-primary'
+      ? 'border-white bg-white/5'
+      : 'border-white/20 hover:border-white/50'
   }`;
 
   return (

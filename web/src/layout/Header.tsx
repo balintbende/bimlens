@@ -1,8 +1,10 @@
 export default function Header() {
   return (
-    <header className="border-b border-gray-200 bg-white">
-      <div className="xl:container mx-auto p-4">
-        <h1 className="text-2xl font-bold text-primary">bimlens</h1>
+    <header className="border-b border-white/10 bg-black">
+      <div className="p-4">
+        <h1 className="text-2xl font-semibold tracking-tight text-secondary">
+          bimlens
+        </h1>
       </div>
     </header>
   );

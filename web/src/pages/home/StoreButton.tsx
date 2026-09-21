@@ -44,15 +44,15 @@ export default function StoreButton({ file }: Props) {
         type="button"
         onClick={handleClick}
         disabled={disabled}
-        className="rounded-md bg-primary px-6 py-2 text-white font-medium shadow-sm hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed"
+        className="rounded-md bg-primary px-6 py-2 text-white font-medium shadow-sm hover:bg-primary/90 disabled:bg-white/10 disabled:text-white/40 disabled:cursor-not-allowed"
       >
         {status.kind === 'pending' ? 'Storing…' : 'Store'}
       </button>
       {status.kind === 'success' && (
-        <p className="text-sm text-green-700">Stored ✓ (id: {status.id})</p>
+        <p className="text-sm text-green-400">Stored ✓ (id: {status.id})</p>
       )}
       {status.kind === 'error' && (
-        <p className="text-sm text-red-700">{status.message}</p>
+        <p className="text-sm text-red-400">{status.message}</p>
       )}
     </div>
   );
