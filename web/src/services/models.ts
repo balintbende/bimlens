@@ -12,12 +12,18 @@ export type StoreModelRequest = {
 
 export type ModelDto = StoreModelRequest & {
   id: string;
+  fileSize: number;
   createdAt: string;
 };
 
-export function storeModel(request: StoreModelRequest): Promise<ModelDto> {
-  return apiFetch<ModelDto>('/store', {
-    method: 'POST',
-    body: JSON.stringify(request),
-  });
+export function storeModel(
+  request: StoreModelRequest,
+  file: File,
+): Promise<ModelDto> {
+  const body = new FormData();
+  for (const [key, value] of Object.entries(request)) {
+    body.append(key, String(value));
+  }
+  body.append('file', file);
+  return apiFetch<ModelDto>('/store', { method: 'POST', body });
 }

@@ -28,7 +28,7 @@ export default function StoreButton({ file }: Props) {
         slabCount: 0,
         doorCount: 0,
         windowCount: 0,
-      });
+      }, file);
       setStatus({ kind: 'success', id: dto.id });
     } catch (err) {
       setStatus({

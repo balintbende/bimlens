@@ -7,7 +7,7 @@ services:
       context: ./api
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=${POSTGRES_DB:-bimlens};Username=${POSTGRES_USER:-bimlens};Password=${POSTGRES_PASSWORD:-bimlens}
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=${POSTGRES_DB:-bimlens};Username=${POSTGRES_USER:-bimlens};Password=${POSTGRES_PASSWORD:-bimlens};GSS Encryption Mode=Disable
       ConnectionStrings__BlobStorage: DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
       Storage__Container: ${BLOB_CONTAINER:-models}
     ports:
