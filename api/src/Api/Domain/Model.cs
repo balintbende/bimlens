@@ -10,5 +10,7 @@ public class Model
     public int SlabCount { get; init; }
     public int DoorCount { get; init; }
     public int WindowCount { get; init; }
+    public required string BlobName { get; init; }
+    public long FileSize { get; init; }
     public DateTime CreatedAt { get; init; }
 }

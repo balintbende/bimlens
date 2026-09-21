@@ -9,4 +9,5 @@ public record ModelDto(
     int SlabCount,
     int DoorCount,
     int WindowCount,
+    long FileSize,
     DateTime CreatedAt);

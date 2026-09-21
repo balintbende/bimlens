@@ -4,6 +4,12 @@ namespace Api.Services;
 
 public interface IModelService
 {
-    IEnumerable<ModelDto> FetchModel();
-    ModelDto Store(StoreModelRequest request);
+    Task<IReadOnlyList<ModelDto>> FetchModelsAsync(CancellationToken cancellationToken = default);
+
+    Task<ModelDto> StoreAsync(
+        StoreModelRequest request,
+        Stream file,
+        long fileSize,
+        string contentType,
+        CancellationToken cancellationToken = default);
 }

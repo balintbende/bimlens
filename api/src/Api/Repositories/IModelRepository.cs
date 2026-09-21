@@ -4,6 +4,6 @@ namespace Api.Repositories;
 
 public interface IModelRepository
 {
-    IEnumerable<Model> GetAll();
-    Model Add(Model model);
+    Task<IReadOnlyList<Model>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<Model> AddAsync(Model model, CancellationToken cancellationToken = default);
 }

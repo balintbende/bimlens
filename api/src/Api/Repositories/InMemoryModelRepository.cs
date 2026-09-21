@@ -7,20 +7,20 @@ public class InMemoryModelRepository : IModelRepository
     private readonly List<Model> _models = [];
     private readonly Lock _lock = new();
 
-    public IEnumerable<Model> GetAll()
+    public Task<IReadOnlyList<Model>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         lock (_lock)
         {
-            return _models.ToArray();
+            return Task.FromResult<IReadOnlyList<Model>>(_models.ToArray());
         }
     }
 
-    public Model Add(Model model)
+    public Task<Model> AddAsync(Model model, CancellationToken cancellationToken = default)
     {
         lock (_lock)
         {
             _models.Add(model);
-            return model;
+            return Task.FromResult(model);
         }
     }
 }
