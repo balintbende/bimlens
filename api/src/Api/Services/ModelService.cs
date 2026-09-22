@@ -13,6 +13,24 @@ public class ModelService(IModelRepository repository, IFileStorage storage) : I
         return models.Select(ToDto).ToList();
     }
 
+    public async Task<ModelDto?> FetchModelAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var model = await repository.GetByIdAsync(id, cancellationToken);
+        return model is null ? null : ToDto(model);
+    }
+
+    public async Task<ModelFile?> OpenFileAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var model = await repository.GetByIdAsync(id, cancellationToken);
+        if (model is null)
+        {
+            return null;
+        }
+
+        var content = await storage.OpenReadAsync(model.BlobName, cancellationToken);
+        return content is null ? null : new ModelFile(model.Name, content);
+    }
+
     public async Task<ModelDto> StoreAsync(
         string name,
         Stream file,

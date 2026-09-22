@@ -14,6 +14,11 @@ public class EfModelRepository(BimlensDbContext db) : IModelRepository
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<Model?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await db.Models.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
+    }
+
     public async Task<Model> AddAsync(Model model, CancellationToken cancellationToken = default)
     {
         db.Models.Add(model);

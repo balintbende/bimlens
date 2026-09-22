@@ -15,4 +15,12 @@ ISO-10303-21;
 GET {{Api_HostAddress}}/models
 Accept: application/json
 
+### Fetch one model (replace the id with one from the list)
+@ModelId = 00000000-0000-0000-0000-000000000000
+GET {{Api_HostAddress}}/models/{{ModelId}}
+Accept: application/json
+
+### Download a model's IFC file
+GET {{Api_HostAddress}}/models/{{ModelId}}/file
+
 ###

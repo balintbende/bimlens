@@ -25,12 +25,29 @@ public class ModelController(IModelService service) : ControllerBase
         var name = Path.GetFileName(file.FileName);
         var contentType = string.IsNullOrEmpty(file.ContentType) ? "application/octet-stream" : file.ContentType;
         var dto = await service.StoreAsync(name, stream, file.Length, contentType, cancellationToken);
-        return CreatedAtAction(nameof(FetchAll), dto);
+        return CreatedAtAction(nameof(Fetch), new { id = dto.Id }, dto);
     }
 
     [HttpGet("/models")]
     public async Task<ActionResult<IEnumerable<ModelDto>>> FetchAll(CancellationToken cancellationToken)
     {
         return Ok(await service.FetchModelsAsync(cancellationToken));
+    }
+
+    [HttpGet("/models/{id:guid}")]
+    public async Task<ActionResult<ModelDto>> Fetch(Guid id, CancellationToken cancellationToken)
+    {
+        var dto = await service.FetchModelAsync(id, cancellationToken);
+        return dto is null ? NotFound() : Ok(dto);
+    }
+
+    [HttpGet("/models/{id:guid}/file")]
+    public async Task<IActionResult> Download(Guid id, CancellationToken cancellationToken)
+    {
+        var file = await service.OpenFileAsync(id, cancellationToken);
+        // File() disposes the stream once the response has been written.
+        return file is null
+            ? NotFound()
+            : File(file.Content, "application/octet-stream", file.Name);
     }
 }

@@ -15,6 +15,14 @@ public class InMemoryModelRepository : IModelRepository
         }
     }
 
+    public Task<Model?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        lock (_lock)
+        {
+            return Task.FromResult(_models.FirstOrDefault(m => m.Id == id));
+        }
+    }
+
     public Task<Model> AddAsync(Model model, CancellationToken cancellationToken = default)
     {
         lock (_lock)

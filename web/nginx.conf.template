@@ -11,6 +11,11 @@ server {
         client_max_body_size 100m;
     }
 
+    # nginx's default mime.types lacks .mjs; module workers (the Fragments worker) require a JS type.
+    location ~ \.mjs$ {
+        types { text/javascript mjs; }
+    }
+
     # SPA fallback so client-side routes resolve to index.html.
     location / {
         try_files $uri $uri/ /index.html;

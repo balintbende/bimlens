@@ -5,5 +5,6 @@ namespace Api.Repositories;
 public interface IModelRepository
 {
     Task<IReadOnlyList<Model>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<Model?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<Model> AddAsync(Model model, CancellationToken cancellationToken = default);
 }
