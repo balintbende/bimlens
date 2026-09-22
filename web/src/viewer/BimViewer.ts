@@ -31,6 +31,7 @@ export class BimViewer {
     world.scene.setup();
     world.scene.three.background = new THREE.Color(0x000000);
     world.renderer = new OBC.SimpleRenderer(this.components, container);
+    world.renderer.showLogo = false;
     world.camera = new OBC.OrthoPerspectiveCamera(this.components);
     this.world = world;
 

@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { BimViewer } from '../../viewer/BimViewer';
+import { BimViewer } from '../viewer/BimViewer';
 
 type Props = {
   file: File;
-  onProgress: (progress: number) => void;
+  onProgress?: (progress: number) => void;
   onLoaded: () => void;
   onError: (message: string) => void;
 };
@@ -32,7 +32,7 @@ export default function Viewer({ file, onProgress, onLoaded, onError }: Props) {
       try {
         const bytes = new Uint8Array(await file.arrayBuffer());
         await viewer.loadIfc(bytes, (progress) => {
-          if (!cancelled) onProgress(progress);
+          if (!cancelled) onProgress?.(progress);
         });
         if (!cancelled) onLoaded();
       } catch (err) {

@@ -88,6 +88,57 @@ public class ModelServiceTests
         Assert.NotEqual(first.Id, second.Id);
     }
 
+    [Fact]
+    public async Task FetchModel_ReturnsStoredModel()
+    {
+        var service = CreateService();
+        var stored = await Store(service, "A");
+
+        var dto = await service.FetchModelAsync(stored.Id);
+
+        Assert.Equal(stored, dto);
+    }
+
+    [Fact]
+    public async Task FetchModel_ReturnsNull_WhenUnknown()
+    {
+        var service = CreateService();
+
+        Assert.Null(await service.FetchModelAsync(Guid.NewGuid()));
+    }
+
+    [Fact]
+    public async Task OpenFile_ReturnsNameAndContent()
+    {
+        var service = CreateService();
+        var stored = await Store(service, "house.ifc", "file-content");
+
+        var file = await service.OpenFileAsync(stored.Id);
+
+        Assert.NotNull(file);
+        Assert.Equal("house.ifc", file.Name);
+        using var reader = new StreamReader(file.Content);
+        Assert.Equal("file-content", await reader.ReadToEndAsync());
+    }
+
+    [Fact]
+    public async Task OpenFile_ReturnsNull_WhenModelUnknown()
+    {
+        var service = CreateService();
+
+        Assert.Null(await service.OpenFileAsync(Guid.NewGuid()));
+    }
+
+    [Fact]
+    public async Task OpenFile_ReturnsNull_WhenBlobMissing()
+    {
+        var service = CreateService();
+        var stored = await Store(service, "A");
+        _storage.Files.Clear();
+
+        Assert.Null(await service.OpenFileAsync(stored.Id));
+    }
+
     private sealed class FakeFileStorage : IFileStorage
     {
         public Dictionary<string, byte[]> Files { get; } = [];
@@ -104,12 +155,18 @@ public class ModelServiceTests
             Files.Remove(name);
             return Task.CompletedTask;
         }
+
+        public Task<Stream?> OpenReadAsync(string name, CancellationToken cancellationToken = default) =>
+            Task.FromResult<Stream?>(Files.TryGetValue(name, out var bytes) ? new MemoryStream(bytes) : null);
     }
 
     private sealed class FailingModelRepository : IModelRepository
     {
         public Task<IReadOnlyList<Model>> GetAllAsync(CancellationToken cancellationToken = default) =>
             Task.FromResult<IReadOnlyList<Model>>([]);
+
+        public Task<Model?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
+            Task.FromResult<Model?>(null);
 
         public Task<Model> AddAsync(Model model, CancellationToken cancellationToken = default) =>
             throw new InvalidOperationException("Database unavailable");
